@@ -1,0 +1,66 @@
+*************************แสดงปีและเรียงลำดับ*******************
+SELECT customers.customerNumber,customers.customerName,orders.orderDate
+FROM customers
+INNER JOIN orders
+ON customers.customerNumber = orders.customerNumber
+WHERE YEAR(orders.orderDate)= 2003
+ORDER BY orders.orderDate ASC;
+*********************แต่ละเดือนมีคนสั่งกี่คนปี2003******************************
+SELECT MONTH (orders.orderDate),COUNT(orders.orderNumber)
+FROM customers
+INNER JOIN orders
+ON customers.customerNumber = orders.customerNumber
+WHERE YEAR(orders.orderDate)= 2003
+GROUP BY MONTH(orders.orderDate)
+ORDER BY orders.orderDate ASC;
+******************การjoin3ตาราง (3table)*************************
+SELECT *
+FROM customers
+INNER JOIN orders
+ON customers.customerNumber=orders.customerNumber
+INNER JOIN orderdetails
+ON orders.orderNumber = orderdetails.orderNumber;
+******************ลูกค้าที่ยอดซื้อสูงสุด5คนแรก ชื่อ ที่อยู่ ยอดซื้อ (3table)*************************
+SELECT customers.customerNumber,SUM(quantityOrdered*priceEach) AS price,addressLine1
+FROM customers
+INNER JOIN orders ON customers.customerNumber=orders.customerNumber
+INNER JOIN orderdetails ON orders.orderNumber = orderdetails.orderNumber
+GROUP BY customers.customerNumber
+ORDER BY price DESC LIMIT 5;
+*******************เซลล์แมนที่ยอดสั่งซื้อสูงสุด3คนแรก***********************
+SELECT employees.employeeNumber,
+		 employees.firstName,
+		 employees.lastName,
+		 SUM(orderdetails.quantityOrdered * orderdetails.priceEach) as a
+FROM customers
+INNER JOIN orders ON customers.customerNumber = orders.customerNumber
+INNER JOIN orderdetails ON orders.orderNumber = orderdetails.orderNumber
+INNER JOIN employees ON customers.salesRepEmployeeNumber = employees.employeeNumber
+GROUP BY employees.employeeNumber
+ORDER BY a  DESC LIMIT 0,3;
+***********************ใส่distinct***********************
+SELECT employees.employeeNumber,
+		 employees.firstName,
+		 employees.lastName,
+		 SUM(orderdetails.quantityOrdered * orderdetails.priceEach) AS a,
+		 COUNT(distinct customers.customerNumber) AS numCustomer
+FROM customers
+INNER JOIN orders ON customers.customerNumber = orders.customerNumber
+INNER JOIN orderdetails ON orders.orderNumber = orderdetails.orderNumber
+INNER JOIN employees ON customers.salesRepEmployeeNumber = employees.employeeNumber
+GROUP BY employees.employeeNumber
+ORDER BY a  DESC LIMIT 0,3;
+*********************ลูกค้าที่ซื้อs18_1749มักซื้ออะไรสูงสุด3อันดับแรก***********************
+SELECT *
+FROM orderdetails
+WHERE ordernumber
+IN(SELECT orderNumber FROM orderdetails
+WHERE  productCode ='s18_1749');
+*********************3อันดับแรก*********************
+SELECT productCode,COUNT(productCode) AS num
+FROM orderdetails
+WHERE ordernumber
+IN(SELECT orderNumber FROM orderdetails
+WHERE  productCode ='s18_1749')
+GROUP BY  productCode
+ORDER BY num DESC LIMIT 1,3;
